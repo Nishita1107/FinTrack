@@ -2,20 +2,30 @@
 
 FinTrack is a personal expense tracking web application built using React, Vite, and Supabase.
 
-The project helps users manage daily expenses, track monthly spending, and view expense analytics through charts and dashboards.
+The project helps users manage daily expenses, track monthly spending, and visualize analytics through interactive charts and dashboards.
 
-## Features
+---
+
+# Live Demo
+
+https://fintrack-app-nu.vercel.app
+
+---
+
+# Features
 
 - User authentication using Supabase
-- Add and manage expenses
+- Add, edit, and delete expenses
 - Categorize transactions
 - Monthly budget tracking
 - Expense analytics and charts
 - Responsive dashboard UI
 
-## Tech Stack
+---
 
-### Frontend
+# Tech Stack
+
+## Frontend
 - React
 - Vite
 - TypeScript
@@ -23,19 +33,28 @@ The project helps users manage daily expenses, track monthly spending, and view 
 - TanStack Router
 - Recharts
 
-### Backend / Database
+## Backend / Database
 - Supabase
 - PostgreSQL
 
-## Getting Started
+## Deployment
+- Vercel
 
-### Prerequisites
+---
+
+# Getting Started
+
+## Prerequisites
+
+Make sure you have the following installed:
 
 - Node.js
 - npm
 - Supabase project
 
-### Installation
+---
+
+# Installation
 
 Clone the repository:
 
