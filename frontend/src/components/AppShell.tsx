@@ -1,7 +1,7 @@
 import { Link, Outlet, useNavigate, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { useEffect } from "react";
-import { LayoutDashboard, PlusCircle, History, BarChart3, User, LogOut, Wallet } from "lucide-react";
+import { LayoutDashboard, PlusCircle, History, BarChart3, User, LogOut, Wallet, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -23,7 +23,17 @@ export function AppShell() {
   }, [loading, user, navigate]);
 
   if (loading || !user) {
-    return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading…</div>;
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background text-muted-foreground animate-fade-in gap-3">
+        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground animate-bounce shadow-md">
+          <Wallet className="h-6 w-6" />
+        </span>
+        <div className="flex items-center gap-2 text-sm font-medium text-foreground/80">
+          <Loader2 className="h-4 w-4 animate-spin text-primary" />
+          Loading FinTrack…
+        </div>
+      </div>
+    );
   }
 
   return (
