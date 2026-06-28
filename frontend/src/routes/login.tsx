@@ -26,7 +26,7 @@ function Login() {
   const passwordValidation = validatePassword(newPassword);
   const passwordsMatch = newPassword === confirmNewPassword;
   const showMatchFeedback = newPassword.length > 0 && confirmNewPassword.length > 0;
-  const isPasswordValid = passwordValidation.score === 5;
+  const isPasswordValid = passwordValidation.score >= 3;
   const canSubmit = isPasswordValid && passwordsMatch && forgotEmail.length > 0;
 
   useEffect(() => {
@@ -171,7 +171,7 @@ function Login() {
             </span>
             <h1 className="text-2xl font-semibold text-foreground">Reset Password</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Enter your email, current password, and choose a new password
+              Enter your email and choose a new password
             </p>
           </div>
           <form onSubmit={handleInlinePasswordReset} className="space-y-4">
