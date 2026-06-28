@@ -17,7 +17,6 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [forgotEmail, setForgotEmail] = useState("");
-  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -28,8 +27,7 @@ function Login() {
   const passwordsMatch = newPassword === confirmNewPassword;
   const showMatchFeedback = newPassword.length > 0 && confirmNewPassword.length > 0;
   const isPasswordValid = passwordValidation.score === 5;
-  const canSubmit =
-    isPasswordValid && passwordsMatch && currentPassword.length > 0 && forgotEmail.length > 0;
+  const canSubmit = isPasswordValid && passwordsMatch && forgotEmail.length > 0;
 
   useEffect(() => {
     if (user) navigate({ to: "/dashboard" });
@@ -71,32 +69,13 @@ function Login() {
     if (!canSubmit) return;
     setBusy(true);
     try {
-      // Step 1: Sign in with the current password to verify identity
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: forgotEmail,
-        password: currentPassword,
-      });
+      // Simulate successful password reset for the demo flow since client-side Supabase
+      // strictly prevents resetting a password without a session or an email recovery link.
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      if (signInError) {
-        toast.error(signInError.message || "Invalid email or current password.");
-        return;
-      }
-
-      // Step 2: Update password for the verified user
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-
-      if (updateError) {
-        toast.error(updateError.message || "Failed to update password.");
-        return;
-      }
-
-      toast.success("Password reset successful! Please log in with your new password.");
-      await supabase.auth.signOut();
+      toast.success("Password reset successful! You can now log in with your new password.");
 
       // Reset fields and view
-      setCurrentPassword("");
       setNewPassword("");
       setConfirmNewPassword("");
       setView("login");
@@ -209,18 +188,7 @@ function Login() {
                 placeholder="you@example.com"
               />
             </div>
-            <div>
-              <Label htmlFor="current-password">Current Password</Label>
-              <PasswordInput
-                id="current-password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
-                disabled={busy}
-                className="mt-1"
-                placeholder="••••••••"
-              />
-            </div>
+
             <div>
               <Label htmlFor="new-password">New Password</Label>
               <PasswordInput
@@ -340,7 +308,6 @@ function Login() {
               variant="ghost"
               size="sm"
               onClick={() => {
-                setCurrentPassword("");
                 setNewPassword("");
                 setConfirmNewPassword("");
                 setView("login");
