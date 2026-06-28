@@ -257,9 +257,6 @@ function Signup() {
             Login
           </Link>
         </p>
-        <p className="mt-2 text-center text-xs text-muted-foreground">
-          You can also try a sample email like <code>student@test.com</code>.
-        </p>
       </div>
     </div>
   );

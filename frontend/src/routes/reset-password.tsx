@@ -18,6 +18,7 @@ function ResetPassword() {
   const [busy, setBusy] = useState(false);
   const [sessionCheckLoading, setSessionCheckLoading] = useState(true);
   const [hasSession, setHasSession] = useState(false);
+  const [isPreview, setIsPreview] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -46,8 +47,15 @@ function ResetPassword() {
       if (!active) return;
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (!session) {
-          toast.error("Session expired or invalid reset link. Please request a new one.");
-          navigate({ to: "/login" });
+          const isPlaceholder = import.meta.env.VITE_SUPABASE_ANON_KEY === "placeholder-anon-key";
+          if (isPlaceholder || import.meta.env.DEV) {
+            setHasSession(true);
+            setIsPreview(true);
+            toast.info("Entering Preview Mode: You can preview the reset password UI. Submission will be simulated.");
+          } else {
+            toast.error("Session expired or invalid reset link. Please request a new one.");
+            navigate({ to: "/login" });
+          }
         }
         setSessionCheckLoading(false);
       });
@@ -71,6 +79,15 @@ function ResetPassword() {
     if (!canSubmit) return;
 
     setBusy(true);
+    if (isPreview) {
+      setTimeout(async () => {
+        toast.success("Password reset successful! (Simulated Preview)");
+        setBusy(false);
+        navigate({ to: "/login" });
+      }, 1500);
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) {
