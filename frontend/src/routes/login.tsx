@@ -24,17 +24,12 @@ function Login() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const resetForgotFields = () => {
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmNewPassword("");
-  };
-
   const passwordValidation = validatePassword(newPassword);
   const passwordsMatch = newPassword === confirmNewPassword;
   const showMatchFeedback = newPassword.length > 0 && confirmNewPassword.length > 0;
   const isPasswordValid = passwordValidation.score === 5;
-  const canSubmitReset = forgotEmail && currentPassword && isPasswordValid && passwordsMatch;
+  const canSubmit =
+    isPasswordValid && passwordsMatch && currentPassword.length > 0 && forgotEmail.length > 0;
 
   useEffect(() => {
     if (user) navigate({ to: "/dashboard" });
@@ -46,10 +41,16 @@ function Login() {
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
-        if (error.message.toLowerCase().includes("confirm") || error.message.toLowerCase().includes("verify")) {
-          toast.error("Please verify your email address. Check your inbox for the confirmation link.", {
-            duration: 6000,
-          });
+        if (
+          error.message.toLowerCase().includes("confirm") ||
+          error.message.toLowerCase().includes("verify")
+        ) {
+          toast.error(
+            "Please verify your email address. Check your inbox for the confirmation link.",
+            {
+              duration: 6000,
+            },
+          );
         } else {
           toast.error(error.message);
         }
@@ -57,63 +58,51 @@ function Login() {
       }
       toast.success("Welcome back!");
       navigate({ to: "/dashboard" });
-    } catch (err: any) {
-      toast.error(err.message || "An unexpected error occurred.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "An unexpected error occurred.";
+      toast.error(message);
     } finally {
       setBusy(false);
     }
   };
 
-  const handleInlineResetPassword = async (e: React.FormEvent) => {
+  const handleInlinePasswordReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canSubmitReset) return;
-
+    if (!canSubmit) return;
     setBusy(true);
-
-    const isPlaceholder = import.meta.env.VITE_SUPABASE_ANON_KEY === "placeholder-anon-key";
-    if (isPlaceholder || import.meta.env.DEV) {
-      setTimeout(() => {
-        toast.success("Password reset successful! Please log in with your new password.");
-        setBusy(false);
-        setView("login");
-        resetForgotFields();
-      }, 1500);
-      return;
-    }
-
     try {
-      // 1. Sign in with the current password to check credentials and get a session
+      // Step 1: Sign in with the current password to verify identity
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: forgotEmail,
         password: currentPassword,
       });
 
       if (signInError) {
-        toast.error(signInError.message || "Incorrect current password or email.");
-        setBusy(false);
+        toast.error(signInError.message || "Invalid email or current password.");
         return;
       }
 
-      // 2. Update the password
+      // Step 2: Update password for the verified user
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
 
       if (updateError) {
         toast.error(updateError.message || "Failed to update password.");
-        setBusy(false);
         return;
       }
 
       toast.success("Password reset successful! Please log in with your new password.");
-
-      // 3. Sign out of the session
       await supabase.auth.signOut();
-      
+
+      // Reset fields and view
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
       setView("login");
-      resetForgotFields();
-    } catch (err: any) {
-      toast.error(err.message || "An error occurred during password reset.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to reset password.";
+      toast.error(message);
     } finally {
       setBusy(false);
     }
@@ -128,7 +117,9 @@ function Login() {
               <Wallet className="h-6 w-6" />
             </span>
             <h1 className="text-2xl font-semibold text-foreground animate-fade-in">FinTrack</h1>
-            <p className="mt-1 text-sm text-muted-foreground animate-fade-in">Login to your account</p>
+            <p className="mt-1 text-sm text-muted-foreground animate-fade-in">
+              Login to your account
+            </p>
           </div>
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
@@ -154,7 +145,6 @@ function Login() {
                   onClick={() => {
                     setForgotEmail(email);
                     setView("forgot");
-                    resetForgotFields();
                   }}
                   disabled={busy}
                   className="p-0 h-auto font-medium text-xs text-primary hover:underline hover:text-primary/80 cursor-pointer"
@@ -172,7 +162,11 @@ function Login() {
                 placeholder="••••••••"
               />
             </div>
-            <Button type="submit" disabled={busy} className="w-full cursor-pointer flex items-center justify-center">
+            <Button
+              type="submit"
+              disabled={busy}
+              className="w-full cursor-pointer flex items-center justify-center"
+            >
               {busy ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -198,10 +192,10 @@ function Login() {
             </span>
             <h1 className="text-2xl font-semibold text-foreground">Reset Password</h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Enter your details below to reset your password
+              Enter your email, current password, and choose a new password
             </p>
           </div>
-          <form onSubmit={handleInlineResetPassword} className="space-y-4">
+          <form onSubmit={handleInlinePasswordReset} className="space-y-4">
             <div>
               <Label htmlFor="forgot-email">Email</Label>
               <Input
@@ -328,7 +322,7 @@ function Login() {
             </div>
             <Button
               type="submit"
-              disabled={busy || !canSubmitReset}
+              disabled={busy || !canSubmit}
               className="w-full cursor-pointer flex items-center justify-center mt-2 disabled:cursor-not-allowed"
             >
               {busy ? (
@@ -346,8 +340,10 @@ function Login() {
               variant="ghost"
               size="sm"
               onClick={() => {
+                setCurrentPassword("");
+                setNewPassword("");
+                setConfirmNewPassword("");
                 setView("login");
-                resetForgotFields();
               }}
               disabled={busy}
               className="text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer flex items-center gap-1"

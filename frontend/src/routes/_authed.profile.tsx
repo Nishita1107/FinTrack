@@ -14,7 +14,7 @@ import { formatINR } from "@/lib/expense-constants";
 
 export const Route = createFileRoute("/_authed/profile")({ component: Profile });
 
-const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 function Profile() {
   const { user } = useAuth();
@@ -34,15 +34,22 @@ function Profile() {
     () =>
       MONTHS.map((m, i) => {
         const found = monthlyBudgets.find((b) => b.year === year && b.month === i + 1);
-        return { month: i + 1, label: m, budget: Number(found?.budget ?? defaultBudget), isOverride: !!found };
+        return {
+          month: i + 1,
+          label: m,
+          budget: Number(found?.budget ?? defaultBudget),
+          isOverride: !!found,
+        };
       }),
-    [monthlyBudgets, year, defaultBudget]
+    [monthlyBudgets, year, defaultBudget],
   );
 
   const [drafts, setDrafts] = useState<Record<number, string>>({});
   useEffect(() => {
     const next: Record<number, string> = {};
-    rows.forEach((r) => { next[r.month] = String(r.budget); });
+    rows.forEach((r) => {
+      next[r.month] = String(r.budget);
+    });
     setDrafts(next);
   }, [year, monthlyBudgets, defaultBudget]); // eslint-disable-line
 
@@ -56,9 +63,13 @@ function Profile() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase.from("profiles").update({
-      full_name: name, monthly_budget: Number(budget),
-    }).eq("id", user!.id);
+    const { error } = await supabase
+      .from("profiles")
+      .update({
+        full_name: name,
+        monthly_budget: Number(budget),
+      })
+      .eq("id", user!.id);
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Profile updated");
@@ -97,14 +108,30 @@ function Profile() {
         <form onSubmit={save} className="space-y-4">
           <div>
             <Label htmlFor="name">Full name</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="mt-1" />
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="mt-1"
+            />
           </div>
           <div>
             <Label htmlFor="budget">Default monthly budget (₹)</Label>
-            <Input id="budget" type="number" min="0" value={budget} onChange={(e) => setBudget(e.target.value)} className="mt-1" />
-            <p className="mt-1 text-xs text-muted-foreground">Used for any month without a custom budget below.</p>
+            <Input
+              id="budget"
+              type="number"
+              min="0"
+              value={budget}
+              onChange={(e) => setBudget(e.target.value)}
+              className="mt-1"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Used for any month without a custom budget below.
+            </p>
           </div>
-          <Button type="submit" disabled={busy}>{busy ? "Saving…" : "Save profile"}</Button>
+          <Button type="submit" disabled={busy}>
+            {busy ? "Saving…" : "Save profile"}
+          </Button>
         </form>
       </Card>
 
@@ -115,18 +142,26 @@ function Profile() {
             <p className="font-semibold text-foreground">Monthly budgets — {year}</p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setYear((y) => y - 1)}>‹</Button>
+            <Button variant="outline" size="sm" onClick={() => setYear((y) => y - 1)}>
+              ‹
+            </Button>
             <span className="text-sm font-medium text-foreground">{year}</span>
-            <Button variant="outline" size="sm" onClick={() => setYear((y) => y + 1)}>›</Button>
+            <Button variant="outline" size="sm" onClick={() => setYear((y) => y + 1)}>
+              ›
+            </Button>
           </div>
         </div>
         <p className="mb-4 text-xs text-muted-foreground">
-          Set a custom budget for each month. Leave as default to inherit your profile budget ({formatINR(defaultBudget)}).
+          Set a custom budget for each month. Leave as default to inherit your profile budget (
+          {formatINR(defaultBudget)}).
         </p>
 
         <div className="grid gap-2 sm:grid-cols-2">
           {rows.map((r) => (
-            <div key={r.month} className="flex items-center gap-2 rounded-lg border border-border p-2">
+            <div
+              key={r.month}
+              className="flex items-center gap-2 rounded-lg border border-border p-2"
+            >
               <span className="w-10 text-sm font-medium text-foreground">{r.label}</span>
               <Input
                 type="number"
@@ -135,7 +170,12 @@ function Profile() {
                 onChange={(e) => setDrafts((d) => ({ ...d, [r.month]: e.target.value }))}
                 className="h-8"
               />
-              <Button size="sm" variant="secondary" onClick={() => saveMonth(r.month)} disabled={setMonthly.isPending}>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => saveMonth(r.month)}
+                disabled={setMonthly.isPending}
+              >
                 Save
               </Button>
             </div>

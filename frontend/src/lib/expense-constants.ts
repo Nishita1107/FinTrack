@@ -1,6 +1,14 @@
 export const CATEGORIES = [
-  "Food", "Travel", "Shopping", "Bills", "Health", "Hostel",
-  "Books & Stationery", "College Fees", "Entertainment", "Other",
+  "Food",
+  "Travel",
+  "Shopping",
+  "Bills",
+  "Health",
+  "Hostel",
+  "Books & Stationery",
+  "College Fees",
+  "Entertainment",
+  "Other",
 ] as const;
 
 export const PAYMENT_METHODS = ["UPI", "Cash", "Card", "Net Banking"] as const;
@@ -19,7 +27,11 @@ export const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export const formatINR = (n: number) =>
-  new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(n);
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(n);
 
 export type Expense = {
   id: string;

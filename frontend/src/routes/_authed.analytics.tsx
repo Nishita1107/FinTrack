@@ -3,9 +3,19 @@ import { useExpenses, useProfile, useMonthlyBudgets } from "@/lib/use-expenses";
 import { CATEGORIES, CATEGORY_COLORS, formatINR } from "@/lib/expense-constants";
 import { Card } from "@/components/ui/card";
 import {
-  PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend,
-  LineChart, Line, XAxis, YAxis, CartesianGrid,
-  BarChart, Bar,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  BarChart,
+  Bar,
 } from "recharts";
 import { useMemo } from "react";
 
@@ -21,12 +31,17 @@ function Analytics() {
 
   const byCat = useMemo(() => {
     const map: Record<string, number> = {};
-    expenses.forEach((e) => { map[e.category] = (map[e.category] ?? 0) + Number(e.amount); });
+    expenses.forEach((e) => {
+      map[e.category] = (map[e.category] ?? 0) + Number(e.amount);
+    });
     return CATEGORIES.filter((c) => map[c]).map((c) => ({ name: c, value: Math.round(map[c]) }));
   }, [expenses]);
 
   const monthly = useMemo(() => {
-    const arr = Array.from({ length: 12 }, (_, i) => ({ month: new Date(year, i).toLocaleString("en", { month: "short" }), spent: 0 }));
+    const arr = Array.from({ length: 12 }, (_, i) => ({
+      month: new Date(year, i).toLocaleString("en", { month: "short" }),
+      spent: 0,
+    }));
     expenses.forEach((e) => {
       const d = new Date(e.expense_date);
       if (d.getFullYear() === year) arr[d.getMonth()].spent += Number(e.amount);
@@ -47,24 +62,49 @@ function Analytics() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-foreground">Analytics</h1>
-        <p className="text-sm text-muted-foreground">Category, monthly trend and budget comparison</p>
+        <p className="text-sm text-muted-foreground">
+          Category, monthly trend and budget comparison
+        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <MiniStat label="Top category" value={top?.name ?? "—"} sub={top ? formatINR(top.value) : ""} />
-        <MiniStat label="Heaviest month" value={heaviest?.spent ? heaviest.month : "—"} sub={heaviest?.spent ? formatINR(heaviest.spent) : ""} />
-        <MiniStat label="Average per month" value={formatINR(Math.round(avg))} sub={`Year ${year}`} />
+        <MiniStat
+          label="Top category"
+          value={top?.name ?? "—"}
+          sub={top ? formatINR(top.value) : ""}
+        />
+        <MiniStat
+          label="Heaviest month"
+          value={heaviest?.spent ? heaviest.month : "—"}
+          sub={heaviest?.spent ? formatINR(heaviest.spent) : ""}
+        />
+        <MiniStat
+          label="Average per month"
+          value={formatINR(Math.round(avg))}
+          sub={`Year ${year}`}
+        />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="p-5">
           <p className="mb-4 text-sm font-semibold text-foreground">Category-wise expenses</p>
           <div className="h-72">
-            {byCat.length === 0 ? <Empty /> : (
+            {byCat.length === 0 ? (
+              <Empty />
+            ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={byCat} dataKey="value" nameKey="name" innerRadius={50} outerRadius={90} paddingAngle={2}>
-                    {byCat.map((d) => <Cell key={d.name} fill={CATEGORY_COLORS[d.name]} />)}
+                  <Pie
+                    data={byCat}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={50}
+                    outerRadius={90}
+                    paddingAngle={2}
+                  >
+                    {byCat.map((d) => (
+                      <Cell key={d.name} fill={CATEGORY_COLORS[d.name]} />
+                    ))}
                   </Pie>
                   <Tooltip formatter={(v: number) => formatINR(v)} />
                   <Legend />
@@ -82,8 +122,21 @@ function Analytics() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
                 <YAxis stroke="var(--muted-foreground)" fontSize={12} />
-                <Tooltip formatter={(v: number) => formatINR(v)} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
-                <Line type="monotone" dataKey="spent" stroke="var(--chart-1)" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Tooltip
+                  formatter={(v: number) => formatINR(v)}
+                  contentStyle={{
+                    background: "var(--card)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 8,
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="spent"
+                  stroke="var(--chart-1)"
+                  strokeWidth={2.5}
+                  dot={{ r: 3 }}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -97,7 +150,14 @@ function Analytics() {
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                 <XAxis dataKey="month" stroke="var(--muted-foreground)" fontSize={12} />
                 <YAxis stroke="var(--muted-foreground)" fontSize={12} />
-                <Tooltip formatter={(v: number) => formatINR(v)} contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8 }} />
+                <Tooltip
+                  formatter={(v: number) => formatINR(v)}
+                  contentStyle={{
+                    background: "var(--card)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 8,
+                  }}
+                />
                 <Legend />
                 <Bar dataKey="Budget" fill="var(--chart-8)" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="Spent" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
@@ -121,5 +181,9 @@ function MiniStat({ label, value, sub }: { label: string; value: string; sub?: s
 }
 
 function Empty() {
-  return <div className="flex h-full items-center justify-center text-sm text-muted-foreground">Add expenses to see analytics</div>;
+  return (
+    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
+      Add expenses to see analytics
+    </div>
+  );
 }

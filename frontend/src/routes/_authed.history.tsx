@@ -5,7 +5,13 @@ import { CATEGORIES, formatINR, type Expense } from "@/lib/expense-constants";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Pencil, Trash2, Download, Inbox } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
@@ -32,7 +38,14 @@ function History() {
   const filtered = expenses.filter((e) => {
     if (cat !== "all" && e.category !== cat) return false;
     if (month !== "all" && !e.expense_date.startsWith(month)) return false;
-    if (search && !(e.description?.toLowerCase().includes(search.toLowerCase()) || e.category.toLowerCase().includes(search.toLowerCase()))) return false;
+    if (
+      search &&
+      !(
+        e.description?.toLowerCase().includes(search.toLowerCase()) ||
+        e.category.toLowerCase().includes(search.toLowerCase())
+      )
+    )
+      return false;
     return true;
   });
 
@@ -48,12 +61,22 @@ function History() {
 
   const exportCsv = () => {
     const rows = [["Date", "Category", "Description", "Payment", "Amount"]];
-    filtered.forEach((e) => rows.push([e.expense_date, e.category, e.description ?? "", e.payment_method, String(e.amount)]));
+    filtered.forEach((e) =>
+      rows.push([
+        e.expense_date,
+        e.category,
+        e.description ?? "",
+        e.payment_method,
+        String(e.amount),
+      ]),
+    );
     const csv = rows.map((r) => r.map((v) => `"${v.replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `expenses-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+    a.href = url;
+    a.download = `expenses-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
     URL.revokeObjectURL(url);
   };
 
@@ -62,7 +85,9 @@ function History() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold text-foreground">Expense History</h1>
-          <p className="text-sm text-muted-foreground">{filtered.length} transactions • {formatINR(total)}</p>
+          <p className="text-sm text-muted-foreground">
+            {filtered.length} transactions • {formatINR(total)}
+          </p>
         </div>
         <Button variant="outline" onClick={exportCsv} disabled={!filtered.length}>
           <Download className="mr-1 h-4 w-4" /> Export CSV
@@ -71,19 +96,35 @@ function History() {
 
       <Card className="p-4">
         <div className="grid gap-3 md:grid-cols-3">
-          <Input placeholder="Search description or category…" value={search} onChange={(e) => setSearch(e.target.value)} />
+          <Input
+            placeholder="Search description or category…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
           <Select value={cat} onValueChange={setCat}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All categories</SelectItem>
-              {CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              {CATEGORIES.map((c) => (
+                <SelectItem key={c} value={c}>
+                  {c}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
           <Select value={month} onValueChange={setMonth}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All months</SelectItem>
-              {months.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}
+              {months.map((m) => (
+                <SelectItem key={m} value={m}>
+                  {m}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -95,8 +136,12 @@ function History() {
         <Card className="flex flex-col items-center gap-3 p-12 text-center">
           <Inbox className="h-10 w-10 text-muted-foreground" />
           <p className="font-medium text-foreground">No expenses found</p>
-          <p className="text-sm text-muted-foreground">Try adjusting your filters or add a new expense.</p>
-          <Link to="/add"><Button>+ Add Expense</Button></Link>
+          <p className="text-sm text-muted-foreground">
+            Try adjusting your filters or add a new expense.
+          </p>
+          <Link to="/add">
+            <Button>+ Add Expense</Button>
+          </Link>
         </Card>
       ) : (
         <Card className="overflow-hidden">
@@ -116,14 +161,26 @@ function History() {
                 {filtered.map((e) => (
                   <tr key={e.id} className="hover:bg-secondary/30">
                     <td className="px-4 py-3 text-muted-foreground">{e.expense_date}</td>
-                    <td className="px-4 py-3 font-medium text-foreground">{e.description || "—"}</td>
-                    <td className="px-4 py-3"><span className="rounded-md bg-secondary px-2 py-0.5 text-xs">{e.category}</span></td>
+                    <td className="px-4 py-3 font-medium text-foreground">
+                      {e.description || "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="rounded-md bg-secondary px-2 py-0.5 text-xs">
+                        {e.category}
+                      </span>
+                    </td>
                     <td className="px-4 py-3 text-muted-foreground">{e.payment_method}</td>
-                    <td className="px-4 py-3 text-right font-semibold">{formatINR(Number(e.amount))}</td>
+                    <td className="px-4 py-3 text-right font-semibold">
+                      {formatINR(Number(e.amount))}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-1">
-                        <Button size="icon" variant="ghost" onClick={() => setEditing(e)}><Pencil className="h-4 w-4" /></Button>
-                        <Button size="icon" variant="ghost" onClick={() => del(e.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => setEditing(e)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button size="icon" variant="ghost" onClick={() => del(e.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
                       </div>
                     </td>
                   </tr>
@@ -137,13 +194,19 @@ function History() {
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="font-medium text-foreground">{e.description || e.category}</p>
-                    <p className="text-xs text-muted-foreground">{e.expense_date} • {e.category} • {e.payment_method}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {e.expense_date} • {e.category} • {e.payment_method}
+                    </p>
                   </div>
                   <p className="font-semibold">{formatINR(Number(e.amount))}</p>
                 </div>
                 <div className="mt-2 flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => setEditing(e)}><Pencil className="h-3 w-3" /> Edit</Button>
-                  <Button size="sm" variant="outline" onClick={() => del(e.id)}><Trash2 className="h-3 w-3" /> Delete</Button>
+                  <Button size="sm" variant="outline" onClick={() => setEditing(e)}>
+                    <Pencil className="h-3 w-3" /> Edit
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => del(e.id)}>
+                    <Trash2 className="h-3 w-3" /> Delete
+                  </Button>
                 </div>
               </li>
             ))}
@@ -163,14 +226,23 @@ function EditDialog({ expense, onClose }: { expense: Expense | null; onClose: ()
   const [cat, setCat] = useState("");
 
   // initialize when expense changes
-  useMemoInit(expense, (e) => { setAmount(String(e.amount)); setDesc(e.description ?? ""); setCat(e.category); });
+  useMemoInit(expense, (e) => {
+    setAmount(String(e.amount));
+    setDesc(e.description ?? "");
+    setCat(e.category);
+  });
 
   if (!expense) return null;
 
   const save = async () => {
-    const { error } = await supabase.from("expenses").update({
-      amount: Number(amount), description: desc || null, category: cat,
-    }).eq("id", expense.id);
+    const { error } = await supabase
+      .from("expenses")
+      .update({
+        amount: Number(amount),
+        description: desc || null,
+        category: cat,
+      })
+      .eq("id", expense.id);
     if (error) return toast.error(error.message);
     toast.success("Updated");
     qc.invalidateQueries({ queryKey: ["expenses"] });
@@ -180,17 +252,39 @@ function EditDialog({ expense, onClose }: { expense: Expense | null; onClose: ()
   return (
     <Dialog open={!!expense} onOpenChange={(o) => !o && onClose()}>
       <DialogContent>
-        <DialogHeader><DialogTitle>Edit expense</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Edit expense</DialogTitle>
+        </DialogHeader>
         <div className="space-y-3">
-          <div><Label>Amount</Label><Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} /></div>
-          <div><Label>Category</Label>
+          <div>
+            <Label>Amount</Label>
+            <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} />
+          </div>
+          <div>
+            <Label>Category</Label>
             <Select value={cat} onValueChange={setCat}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
             </Select>
           </div>
-          <div><Label>Description</Label><Input value={desc} onChange={(e) => setDesc(e.target.value)} /></div>
-          <div className="flex justify-end gap-2"><Button variant="outline" onClick={onClose}>Cancel</Button><Button onClick={save}>Save</Button></div>
+          <div>
+            <Label>Description</Label>
+            <Input value={desc} onChange={(e) => setDesc(e.target.value)} />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button onClick={save}>Save</Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
@@ -202,7 +296,10 @@ import { useEffect, useRef } from "react";
 function useMemoInit<T>(value: T, init: (v: NonNullable<T>) => void) {
   const last = useRef<T | null>(null);
   useEffect(() => {
-    if (value && value !== last.current) { init(value as NonNullable<T>); last.current = value; }
+    if (value && value !== last.current) {
+      init(value as NonNullable<T>);
+      last.current = value;
+    }
     if (!value) last.current = null;
   }, [value]);
 }

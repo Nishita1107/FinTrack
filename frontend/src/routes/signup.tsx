@@ -30,7 +30,8 @@ function Signup() {
   const passwordsMatch = password === confirmPassword;
   const showMatchFeedback = password.length > 0 && confirmPassword.length > 0;
   const isPasswordValid = passwordValidation.score === 5;
-  const canSubmit = isPasswordValid && passwordsMatch && name.trim().length > 0 && email.trim().length > 0;
+  const canSubmit =
+    isPasswordValid && passwordsMatch && name.trim().length > 0 && email.trim().length > 0;
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,10 +82,12 @@ function Signup() {
           </span>
           <h1 className="text-2xl font-semibold text-foreground">Verify your email</h1>
           <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
-            We have sent a verification link to <strong className="text-foreground">{email}</strong>.
+            We have sent a verification link to <strong className="text-foreground">{email}</strong>
+            .
           </p>
           <p className="mt-2 text-xs text-muted-foreground leading-relaxed">
-            Please check your inbox (and spam folder) and click the link to activate your FinTrack account.
+            Please check your inbox (and spam folder) and click the link to activate your FinTrack
+            account.
           </p>
           <div className="mt-6 border-t border-border pt-6">
             <Button
@@ -109,7 +112,9 @@ function Signup() {
             <Wallet className="h-6 w-6" />
           </span>
           <h1 className="text-2xl font-semibold text-foreground">Register</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Create an account to start tracking expenses</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Create an account to start tracking expenses
+          </p>
         </div>
         <form onSubmit={submit} className="space-y-4">
           <div>

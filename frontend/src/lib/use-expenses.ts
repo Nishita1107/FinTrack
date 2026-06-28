@@ -60,14 +60,19 @@ export function useSetMonthlyBudget() {
   const qc = useQueryClient();
   const { user } = useAuth();
   return useMutation({
-    mutationFn: async ({ year, month, budget }: { year: number; month: number; budget: number }) => {
+    mutationFn: async ({
+      year,
+      month,
+      budget,
+    }: {
+      year: number;
+      month: number;
+      budget: number;
+    }) => {
       if (!user) throw new Error("Not authenticated");
       const { error } = await supabase
         .from("monthly_budgets")
-        .upsert(
-          { user_id: user.id, year, month, budget },
-          { onConflict: "user_id,year,month" }
-        );
+        .upsert({ user_id: user.id, year, month, budget }, { onConflict: "user_id,year,month" });
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["monthly_budgets"] }),

@@ -34,7 +34,9 @@ function ResetPassword() {
     });
 
     // Listen to auth state changes (e.g. PASSWORD_RECOVERY event)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (!active) return;
       if (session && (event === "SIGNED_IN" || event === "PASSWORD_RECOVERY")) {
         setHasSession(true);
@@ -51,7 +53,9 @@ function ResetPassword() {
           if (isPlaceholder || import.meta.env.DEV) {
             setHasSession(true);
             setIsPreview(true);
-            toast.info("Entering Preview Mode: You can preview the reset password UI. Submission will be simulated.");
+            toast.info(
+              "Entering Preview Mode: You can preview the reset password UI. Submission will be simulated.",
+            );
           } else {
             toast.error("Session expired or invalid reset link. Please request a new one.");
             navigate({ to: "/login" });
@@ -127,7 +131,9 @@ function ResetPassword() {
             <Wallet className="h-6 w-6" />
           </span>
           <h1 className="text-2xl font-semibold text-foreground">Reset Password</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Choose a strong new password for your account</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Choose a strong new password for your account
+          </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

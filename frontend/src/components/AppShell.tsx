@@ -1,7 +1,16 @@
 import { Link, Outlet, useNavigate, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import { useEffect } from "react";
-import { LayoutDashboard, PlusCircle, History, BarChart3, User, LogOut, Wallet, Loader2 } from "lucide-react";
+import {
+  LayoutDashboard,
+  PlusCircle,
+  History,
+  BarChart3,
+  User,
+  LogOut,
+  Wallet,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -54,7 +63,9 @@ export function AppShell() {
                   key={n.to}
                   to={n.to}
                   className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                    active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    active
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                   }`}
                 >
                   <n.icon className="h-4 w-4" />
@@ -63,7 +74,14 @@ export function AppShell() {
               );
             })}
           </nav>
-          <Button variant="ghost" size="sm" onClick={async () => { await signOut(); navigate({ to: "/login" }); }}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={async () => {
+              await signOut();
+              navigate({ to: "/login" });
+            }}
+          >
             <LogOut className="h-4 w-4" />
             <span className="ml-1 hidden sm:inline">Logout</span>
           </Button>
