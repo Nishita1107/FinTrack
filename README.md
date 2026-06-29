@@ -2,7 +2,7 @@
 
 FinTrack is a premium, modern personal finance manager designed to help students and professionals track their daily spending, set budgets, and visualize their financial trends. Built on a robust tech stack of **React, Vite, TanStack Router, TailwindCSS, and Supabase**, the app offers a lightning-fast experience with comprehensive local-storage fallback systems for quick test runs and demo presentations.
 
-👉 **Live Demo:** [fintrack-app-nu.vercel.app](https://fintrack-app-nu.vercel.app)
+ **Live Demo:** [fintrack-app-nu.vercel.app](https://fintrack-app-nu.vercel.app)
 
 ---
 
