@@ -7,6 +7,11 @@ export function useExpenses() {
   return useQuery({
     queryKey: ["expenses"],
     queryFn: async () => {
+      const isMock = localStorage.getItem("mock-user-session") !== null;
+      if (isMock) {
+        const stored = localStorage.getItem("mock-expenses");
+        return stored ? JSON.parse(stored) : [];
+      }
       const { data, error } = await supabase
         .from("expenses")
         .select("*")
@@ -22,6 +27,16 @@ export function useProfile() {
   return useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
+      const isMock = localStorage.getItem("mock-user-session") !== null;
+      if (isMock) {
+        const storedProfile = localStorage.getItem("mock-profile");
+        if (storedProfile) return JSON.parse(storedProfile);
+        return {
+          id: "00000000-0000-0000-0000-000000000000",
+          full_name: "Demo User",
+          monthly_budget: 10000,
+        };
+      }
       const { data, error } = await supabase.from("profiles").select("*").maybeSingle();
       if (error) throw error;
       return data;
@@ -41,6 +56,11 @@ export function useMonthlyBudgets() {
   return useQuery({
     queryKey: ["monthly_budgets"],
     queryFn: async () => {
+      const isMock = localStorage.getItem("mock-user-session") !== null;
+      if (isMock) {
+        const stored = localStorage.getItem("mock-budgets");
+        return stored ? JSON.parse(stored) : [];
+      }
       const { data, error } = await supabase.from("monthly_budgets").select("*").limit(1000);
       if (error) throw error;
       return (data ?? []) as MonthlyBudget[];
@@ -70,6 +90,25 @@ export function useSetMonthlyBudget() {
       budget: number;
     }) => {
       if (!user) throw new Error("Not authenticated");
+      const isMock = localStorage.getItem("mock-user-session") !== null;
+      if (isMock) {
+        const stored = localStorage.getItem("mock-budgets");
+        const list: MonthlyBudget[] = stored ? JSON.parse(stored) : [];
+        const index = list.findIndex((b) => b.year === year && b.month === month);
+        if (index >= 0) {
+          list[index].budget = budget;
+        } else {
+          list.push({
+            id: Math.random().toString(),
+            user_id: user.id,
+            year,
+            month,
+            budget,
+          });
+        }
+        localStorage.setItem("mock-budgets", JSON.stringify(list));
+        return;
+      }
       const { error } = await supabase
         .from("monthly_budgets")
         .upsert({ user_id: user.id, year, month, budget }, { onConflict: "user_id,year,month" });

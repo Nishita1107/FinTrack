@@ -63,15 +63,27 @@ function Profile() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({
+    const isMock = localStorage.getItem("mock-user-session") !== null;
+    let errorObj = null;
+    if (isMock) {
+      const mockProfile = {
+        id: user!.id,
         full_name: name,
         monthly_budget: Number(budget),
-      })
-      .eq("id", user!.id);
+      };
+      localStorage.setItem("mock-profile", JSON.stringify(mockProfile));
+    } else {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: name,
+          monthly_budget: Number(budget),
+        })
+        .eq("id", user!.id);
+      errorObj = error;
+    }
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (errorObj) return toast.error(errorObj.message);
     toast.success("Profile updated");
     qc.invalidateQueries({ queryKey: ["profile"] });
   };

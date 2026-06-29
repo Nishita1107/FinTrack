@@ -48,16 +48,35 @@ function AddExpense() {
     if (!category) return toast.error("Pick a category");
     if (!method) return toast.error("Pick a payment method");
     setBusy(true);
-    const { error } = await supabase.from("expenses").insert({
-      user_id: user!.id,
-      amount: amt,
-      category,
-      payment_method: method,
-      description: desc || null,
-      expense_date: date,
-    });
+    const isMock = localStorage.getItem("mock-user-session") !== null;
+    let errorObj = null;
+    if (isMock) {
+      const stored = localStorage.getItem("mock-expenses");
+      const list = stored ? JSON.parse(stored) : [];
+      list.unshift({
+        id: Math.random().toString(),
+        user_id: user!.id,
+        amount: amt,
+        category,
+        payment_method: method,
+        description: desc || null,
+        expense_date: date,
+        created_at: new Date().toISOString(),
+      });
+      localStorage.setItem("mock-expenses", JSON.stringify(list));
+    } else {
+      const { error } = await supabase.from("expenses").insert({
+        user_id: user!.id,
+        amount: amt,
+        category,
+        payment_method: method,
+        description: desc || null,
+        expense_date: date,
+      });
+      errorObj = error;
+    }
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (errorObj) return toast.error(errorObj.message);
     toast.success("Expense added");
     qc.invalidateQueries({ queryKey: ["expenses"] });
     reset();

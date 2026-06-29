@@ -53,8 +53,18 @@ function History() {
 
   const del = async (id: string) => {
     if (!confirm("Delete this expense?")) return;
-    const { error } = await supabase.from("expenses").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    const isMock = localStorage.getItem("mock-user-session") !== null;
+    let errorObj = null;
+    if (isMock) {
+      const stored = localStorage.getItem("mock-expenses");
+      const list = stored ? JSON.parse(stored) : [];
+      const filteredList = list.filter((e: any) => e.id !== id);
+      localStorage.setItem("mock-expenses", JSON.stringify(filteredList));
+    } else {
+      const { error } = await supabase.from("expenses").delete().eq("id", id);
+      errorObj = error;
+    }
+    if (errorObj) return toast.error(errorObj.message);
     toast.success("Deleted");
     qc.invalidateQueries({ queryKey: ["expenses"] });
   };
@@ -235,15 +245,33 @@ function EditDialog({ expense, onClose }: { expense: Expense | null; onClose: ()
   if (!expense) return null;
 
   const save = async () => {
-    const { error } = await supabase
-      .from("expenses")
-      .update({
-        amount: Number(amount),
-        description: desc || null,
-        category: cat,
-      })
-      .eq("id", expense.id);
-    if (error) return toast.error(error.message);
+    const isMock = localStorage.getItem("mock-user-session") !== null;
+    let errorObj = null;
+    if (isMock) {
+      const stored = localStorage.getItem("mock-expenses");
+      const list = stored ? JSON.parse(stored) : [];
+      const index = list.findIndex((e: any) => e.id === expense.id);
+      if (index >= 0) {
+        list[index] = {
+          ...list[index],
+          amount: Number(amount),
+          description: desc || null,
+          category: cat,
+        };
+        localStorage.setItem("mock-expenses", JSON.stringify(list));
+      }
+    } else {
+      const { error } = await supabase
+        .from("expenses")
+        .update({
+          amount: Number(amount),
+          description: desc || null,
+          category: cat,
+        })
+        .eq("id", expense.id);
+      errorObj = error;
+    }
+    if (errorObj) return toast.error(errorObj.message);
     toast.success("Updated");
     qc.invalidateQueries({ queryKey: ["expenses"] });
     onClose();
