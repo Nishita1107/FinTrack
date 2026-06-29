@@ -84,7 +84,7 @@ frontend/
 
 ---
 
-## ⚙️ Development Scripts
+##  Development Scripts
 
 *   `npm run dev` - Starts the Vite dev server with hot module replacement (HMR).
 *   `npm run build` - Compiles and builds the production-ready build bundle in the `dist` directory.
