@@ -1,6 +1,6 @@
 # FinTrack — Personal Expense Tracker
 
-FinTrack is a personal expense tracking web application built using **React, Vite, TanStack Router, Tailwind CSS, and Supabase**. It helps users manage daily expenses, set monthly budgets, monitor spending habits, and visualize financial insights through an intuitive dashboard.
+FinTrack is a personal expense tracking web application built using **React, Vite, TanStack Router, Tailwind CSS, and Supabase**. It was developed to help users manage their daily expenses, set monthly budgets, and keep track of their spending through a simple and responsive interface.
 
 **Live Demo:** https://fintrack-app-nu.vercel.app
 
@@ -8,33 +8,34 @@ FinTrack is a personal expense tracking web application built using **React, Vit
 
 ## Features
 
-- **Secure Authentication:** User authentication powered by Supabase Auth with login, signup, and inline password reset functionality.
-- **Interactive Dashboard:** Track monthly spending, monitor savings, view budget progress, and access financial summaries.
-- **Expense Management:** Add, edit, delete, and organize expenses with categories, descriptions, payment methods, and dates.
-- **Budget Management:** Set a default monthly budget and create custom budget overrides for individual months.
-- **Analytics:** Visualize spending trends and category-wise expense distribution using interactive charts.
-- **CSV Export:** Export filtered transaction history as a CSV file.
-- **Demo Mode:** Supports LocalStorage-based data storage for testing and offline demonstrations when Supabase is unavailable.
+* **Secure Authentication:** Sign up, log in, and reset passwords using Supabase Auth.
+* **Dashboard:** View monthly expenses, savings, budget progress, and spending summaries.
+* **Expense Management:** Add, edit, and delete transactions with categories, payment methods, descriptions, and dates.
+* **Budget Tracking:** Set a monthly budget and create custom budget overrides whenever needed.
+* **Expense Analytics:** View spending trends and category-wise distribution through charts.
+* **CSV Export:** Export your transaction history as a CSV file.
+* **Demo Mode:** Uses LocalStorage to allow the application to work without a Supabase connection during testing or demonstrations.
 
 ---
 
 ## Tech Stack
 
 ### Frontend
-- **Framework:** React (Vite)
-- **Routing:** TanStack Router
-- **State Management:** TanStack Query
-- **Styling:** Tailwind CSS
-- **UI Components:** Radix UI & shadcn/ui
-- **Icons:** Lucide React
-- **Form Handling:** React Hook Form
-- **Validation:** Zod
+
+* **Framework:** React (Vite)
+* **Routing:** TanStack Router
+* **State Management:** TanStack Query
+* **Styling:** Tailwind CSS
+* **UI Components:** shadcn/ui & Radix UI
+* **Icons:** Lucide React
+* **Forms & Validation:** React Hook Form + Zod
 
 ### Backend & Database
-- **Backend:** Supabase
-- **Authentication:** Supabase Auth
-- **Database:** PostgreSQL
-- **Security:** Row-Level Security (RLS)
+
+* **Backend:** Supabase
+* **Authentication:** Supabase Auth
+* **Database:** PostgreSQL
+* **Security:** Row-Level Security (RLS)
 
 ---
 
@@ -42,8 +43,8 @@ FinTrack is a personal expense tracking web application built using **React, Vit
 
 ### Prerequisites
 
-- Node.js (v18 or later)
-- npm or yarn
+* Node.js (v18 or later)
+* npm
 
 ### 1. Clone the Repository
 
@@ -54,7 +55,7 @@ cd FinTrack/frontend
 
 ### 2. Configure Environment Variables
 
-Create a `.env` file inside the `frontend` directory.
+Create a `.env` file inside the `frontend` folder and add:
 
 ```env
 VITE_SUPABASE_URL=your-supabase-project-url
@@ -67,7 +68,7 @@ VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
 npm install
 ```
 
-### 4. Run the Development Server
+### 4. Start the Development Server
 
 ```bash
 npm run dev
@@ -85,7 +86,7 @@ frontend/
 │   ├── components/       # Reusable UI components
 │   ├── hooks/            # Custom React hooks
 │   ├── integrations/     # Supabase configuration
-│   ├── lib/              # Utilities, validators & contexts
+│   ├── lib/              # Utilities, validation & context
 │   ├── routes/           # Application routes
 │   ├── main.tsx
 │   └── styles.css
@@ -97,26 +98,26 @@ frontend/
 
 ## Available Scripts
 
-- `npm run dev` – Starts the development server.
-- `npm run build` – Builds the application for production.
-- `npm run lint` – Runs ESLint to identify code issues.
-- `npm run format` – Formats the project using Prettier.
+* `npm run dev` – Starts the development server.
+* `npm run build` – Creates a production build.
+* `npm run lint` – Checks the code using ESLint.
+* `npm run format` – Formats the code using Prettier.
 
 ---
 
-## Security
+## Notes
 
-FinTrack uses **Supabase Authentication** and **PostgreSQL Row-Level Security (RLS)** to ensure users can only access and manage their own data.
-
-For testing and demonstrations, the application also includes a **LocalStorage-based Demo Mode**, allowing core features such as authentication, expense management, budgeting, and analytics to work without an active Supabase connection.
+* Authentication is handled using Supabase Auth.
+* PostgreSQL Row-Level Security (RLS) ensures users can only access their own data.
+* Demo Mode stores data in the browser using LocalStorage, making it easy to test the application without setting up Supabase.
 
 ---
 
-## Future Enhancements
+## Future Improvements
 
-- Income tracking
-- Recurring transactions
-- Receipt uploads
-- Spending insights
-- Multi-currency support
-- Dark mode
+* Income tracking
+* Recurring transactions
+* Receipt uploads
+* Better expense insights
+* Multi-currency support
+* Dark mode
