@@ -14,6 +14,7 @@ import {
   Lightbulb,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AIInsightsCard } from "@/components/AIInsightsCard";
 
 export const Route = createFileRoute("/_authed/dashboard")({ component: Dashboard });
 
@@ -187,6 +188,8 @@ function Dashboard() {
           )}
         </Card>
       </div>
+
+      <AIInsightsCard />
 
       <Card className="p-5">
         <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">

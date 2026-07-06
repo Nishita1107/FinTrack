@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { User, CalendarRange } from "lucide-react";
+import { User, CalendarRange, Sparkles } from "lucide-react";
 import { formatINR } from "@/lib/expense-constants";
 
 export const Route = createFileRoute("/_authed/profile")({ component: Profile });
@@ -25,6 +25,28 @@ function Profile() {
   const [name, setName] = useState("");
   const [budget, setBudget] = useState("");
   const [busy, setBusy] = useState(false);
+  const [geminiKey, setGeminiKey] = useState("");
+  const [hasLocalKey, setHasLocalKey] = useState(false);
+
+  useEffect(() => {
+    const key = localStorage.getItem("mock-gemini-api-key") ?? "";
+    setGeminiKey(key);
+    setHasLocalKey(!!key);
+  }, []);
+
+  const saveGeminiKey = (e: React.FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem("mock-gemini-api-key", geminiKey);
+    setHasLocalKey(!!geminiKey);
+    toast.success("Gemini API Key saved locally");
+  };
+
+  const clearGeminiKey = () => {
+    localStorage.removeItem("mock-gemini-api-key");
+    setGeminiKey("");
+    setHasLocalKey(false);
+    toast.success("Gemini API Key removed");
+  };
 
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
@@ -193,6 +215,39 @@ function Profile() {
             </div>
           ))}
         </div>
+      </Card>
+
+      <Card className="p-6">
+        <div className="mb-4 flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-primary" />
+          <p className="font-semibold text-foreground">AI Assistant Settings</p>
+        </div>
+        <p className="mb-4 text-xs text-muted-foreground">
+          Enter a Google Gemini API Key to enable personalized AI Chat, Insights, and Monthly
+          Reports. This key is saved strictly in your browser's local storage and is sent directly
+          to Google's Gemini API.
+        </p>
+        <form onSubmit={saveGeminiKey} className="space-y-4">
+          <div>
+            <Label htmlFor="gemini-key">Gemini API Key</Label>
+            <Input
+              id="gemini-key"
+              type="password"
+              value={geminiKey}
+              onChange={(e) => setGeminiKey(e.target.value)}
+              placeholder="AIzaSy..."
+              className="mt-1"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button type="submit">Save API Key</Button>
+            {hasLocalKey && (
+              <Button type="button" variant="outline" onClick={clearGeminiKey}>
+                Clear
+              </Button>
+            )}
+          </div>
+        </form>
       </Card>
     </div>
   );

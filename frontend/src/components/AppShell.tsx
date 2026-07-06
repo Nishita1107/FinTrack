@@ -10,15 +10,18 @@ import {
   LogOut,
   Wallet,
   Loader2,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
+import { AIChatBot } from "@/components/AIChatBot";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/add", label: "Add Expense", icon: PlusCircle },
   { to: "/history", label: "History", icon: History },
   { to: "/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/report", label: "AI Report", icon: FileText },
   { to: "/profile", label: "Profile", icon: User },
 ];
 
@@ -111,6 +114,7 @@ export function AppShell() {
       <footer className="border-t border-border py-5 text-center text-xs text-muted-foreground">
         FinTrack © 2026 · Student Expense Management System
       </footer>
+      <AIChatBot />
       <Toaster richColors position="top-right" />
     </div>
   );
