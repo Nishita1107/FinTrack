@@ -76,8 +76,7 @@ export async function queryAIAssistant(payload: AIServicePayload): Promise<strin
  * 2. Running a smart, rule-based local analyzer.
  */
 async function executeClientSideAI(payload: AIServicePayload): Promise<string> {
-  const geminiApiKey =
-    localStorage.getItem("mock-gemini-api-key") || import.meta.env.VITE_GEMINI_API_KEY || "";
+  const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
 
   // Gather data from localStorage
   const expensesStr = localStorage.getItem("mock-expenses");
@@ -313,7 +312,7 @@ function runLocalFinancialAnalyzer(payload: AIServicePayload, context: AIContext
 
     // Add API key instruction as helper tip
     list.push(
-      `- [Tip] Set your Gemini API key in the Profile page to unlock real conversational advice and deeper insights!`,
+      `- [Tip] Configure VITE_GEMINI_API_KEY in your local .env to enable live AI responses.`,
     );
 
     return list.slice(0, 5).join("\n");
@@ -394,7 +393,7 @@ ${
 ## Personalized Financial Tips (Simulated)
 1. **Optimize your top category:** Since you spent the most on **${repSortedCats[0]?.[0] || "Miscellaneous"}** (₹${repSortedCats[0]?.[1] || 0}), try setting a dedicated weekly cap of ₹${Math.round((repSortedCats[0]?.[1] || 0) * 0.2)} on this category.
 2. **Review payment methods:** Ensure you are monitoring digital UPI transactions as they are frictionless and lead to impulse buys.
-3. **Connect Gemini API:** For personalized AI reports with conversational financial advice and automated trends, please enter your **Gemini API Key** in the **Profile** page settings!
+3. **AI Capabilities:** Deploy the backend Supabase Edge Function with GEMINI_API_KEY to unlock personalized real-time reports.
 `;
   }
 
@@ -487,5 +486,5 @@ Try asking me specific questions like:
 - *What subscriptions am I paying for?*
 - *Give me tips to save more money.*
 
-*(To enable advanced AI responses, please enter your Gemini API Key in your Profile tab!)*`;
+*(Connect your backend Supabase Edge Function to enable live generative AI responses!)*`;
 }

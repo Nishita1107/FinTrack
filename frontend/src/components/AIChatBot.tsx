@@ -1,40 +1,72 @@
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, X, Send, Trash2, ShieldAlert } from "lucide-react";
+import { Sparkles, X, Send, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { queryAIAssistant, ChatMessage } from "@/lib/ai-service";
 import { Markdown } from "@/lib/markdown";
+import { useExpenses, useProfile, useBudgetFor } from "@/lib/use-expenses";
 
 export function AIChatBot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      role: "assistant",
-      content: `Hi! I'm **FinTrack AI**, your personal financial assistant.
-
-I have access to your expenses and budgets for this month. You can ask me questions like:
-* *How much did I spend on food this month?*
-* *Can I afford a ₹40,000 laptop?*
-* *Compare this month with last month.*
-* *Give me tips to save more money.*`,
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [isMockSession, setIsMockSession] = useState(false);
   const [hasApiKey, setHasApiKey] = useState(false);
+
+  const { data: expenses = [] } = useExpenses();
+  const { data: profile } = useProfile();
+  const now = new Date();
+  const budget = useBudgetFor(now.getFullYear(), now.getMonth() + 1);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Check state on mount/open
   useEffect(() => {
     const isMock = localStorage.getItem("mock-user-session") !== null;
-    const key =
-      localStorage.getItem("mock-gemini-api-key") || import.meta.env.VITE_GEMINI_API_KEY || "";
+    const key = import.meta.env.VITE_GEMINI_API_KEY || "";
     setIsMockSession(isMock);
     setHasApiKey(key.trim().length > 0);
   }, [isOpen]);
+
+  // Set dynamic welcome message when data is ready
+  useEffect(() => {
+    const isMock = localStorage.getItem("mock-user-session") !== null;
+    const name = profile?.full_name || (isMock ? "Demo User" : "User");
+    const currentMonthExpenses = expenses.filter((e) => {
+      const d = new Date(e.expense_date);
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    });
+    const totalSpent = currentMonthExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
+    const remaining = budget - totalSpent;
+
+    const byCat: Record<string, number> = {};
+    currentMonthExpenses.forEach((e) => {
+      byCat[e.category] = (byCat[e.category] ?? 0) + Number(e.amount);
+    });
+    const sortedCats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+    const topCatName = sortedCats[0]?.[0] || "None";
+    const topCatAmt = sortedCats[0]?.[1] || 0;
+
+    const timeString = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+
+    setMessages([
+      {
+        role: "assistant",
+        content: `Hi **${name}**! I'm **FinTrack AI**, your personal financial assistant.
+
+Here is your snapshot for **${now.toLocaleString("en-US", { month: "long" })}**:
+* **Monthly Budget:** ₹${budget}
+* **Spent so far:** ₹${totalSpent}
+* **Remaining Budget:** ₹${remaining} (${remaining >= 0 ? "Under budget" : "Over budget"})
+* **Top category:** ${topCatName} (₹${topCatAmt})
+
+Ask me anything about your spending, budget limits, or savings tips!`,
+        timestamp: timeString,
+      },
+    ]);
+  }, [profile, expenses, budget, isOpen]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -47,7 +79,12 @@ I have access to your expenses and budgets for this month. You can ask me questi
   const handleSend = async (text: string) => {
     if (!text.trim()) return;
 
-    const userMsg: ChatMessage = { role: "user", content: text };
+    const nowTime = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+    const userMsg: ChatMessage = {
+      role: "user",
+      content: text,
+      timestamp: nowTime,
+    };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsTyping(true);
@@ -63,15 +100,17 @@ I have access to your expenses and budgets for this month. You can ask me questi
         chatHistory: [...chatHistory, userMsg],
       });
 
-      setMessages((prev) => [...prev, { role: "assistant", content: response }]);
+      const modelTime = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+      setMessages((prev) => [...prev, { role: "assistant", content: response, timestamp: modelTime }]);
     } catch (error) {
       console.error(error);
+      const errTime = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content:
-            "Sorry, I encountered an error. Please try again or check your API configuration.",
+          content: "Sorry, I encountered an error. Please try again or check your backend configuration.",
+          timestamp: errTime,
         },
       ]);
     } finally {
@@ -84,21 +123,23 @@ I have access to your expenses and budgets for this month. You can ask me questi
   };
 
   const clearChat = () => {
+    const clearTime = new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
     setMessages([
       {
         role: "assistant",
         content: `Chat history cleared. I'm ready for new questions! 
 
 Ask me anything about your spending, budgets, or savings.`,
+        timestamp: clearTime,
       },
     ]);
   };
 
   const suggestedPrompts = [
-    "How much did I spend on food this month?",
+    "How much did I spend on Food this month?",
     "Can I afford a ₹40,000 laptop?",
     "Give me tips to save more money.",
-    "What subscriptions am I paying for?",
+    "What was my largest expense?",
   ];
 
   return (
@@ -149,11 +190,10 @@ Ask me anything about your spending, budgets, or savings.`,
 
           {/* Alert for Demo Mode without API Key */}
           {isMockSession && !hasApiKey && (
-            <div className="flex items-center gap-2 bg-amber-500/10 px-3 py-1.5 text-[11px] text-amber-600 dark:text-amber-500 border-b border-amber-500/20">
-              <ShieldAlert className="h-3.5 w-3.5 flex-shrink-0" />
+            <div className="flex items-center gap-2 bg-amber-500/10 px-3 py-1.5 text-[10px] text-amber-600 dark:text-amber-500 border-b border-amber-500/20">
+              <Sparkles className="h-3.5 w-3.5 flex-shrink-0 animate-pulse text-amber-500" />
               <span>
-                Running locally. Enter a <strong>Gemini API Key</strong> in the{" "}
-                <strong>Profile</strong> tab for live AI responses.
+                Simulated Preview Mode. Set <code>VITE_GEMINI_API_KEY</code> in `.env` for live AI.
               </span>
             </div>
           )}
@@ -164,7 +204,7 @@ Ask me anything about your spending, budgets, or savings.`,
               {messages.map((m, i) => (
                 <div
                   key={i}
-                  className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
+                  className={`flex flex-col ${m.role === "user" ? "items-end" : "items-start"}`}
                 >
                   <div
                     className={`rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
@@ -175,6 +215,11 @@ Ask me anything about your spending, budgets, or savings.`,
                   >
                     <Markdown content={m.content} />
                   </div>
+                  {m.timestamp && (
+                    <span className="text-[9px] text-muted-foreground/80 mt-1 px-1">
+                      {m.timestamp}
+                    </span>
+                  )}
                 </div>
               ))}
 
@@ -242,7 +287,7 @@ Ask me anything about your spending, budgets, or savings.`,
               disabled={isTyping || !input.trim()}
               className="h-9 w-9 flex-shrink-0 cursor-pointer"
             >
-              <Send className="h-4 w-4" />
+              {isTyping ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
           </form>
         </div>

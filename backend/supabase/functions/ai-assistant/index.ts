@@ -75,11 +75,29 @@ serve(async (req) => {
     const budgets = budgetsResult.data || [];
 
     // Build context
+    const budgetLimit = Number(profile.monthly_budget);
     const currentDate = new Date().toISOString().slice(0, 10);
     const currentMonthStr = new Date().toLocaleString("en-US", { month: "long", year: "numeric" });
 
-    // Category lists and formats
-    const budgetLimit = Number(profile.monthly_budget);
+    // Compute current month statistics
+    const currentMonthIdx = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+    const currentMonthExpenses = expenses.filter((e: any) => {
+      const d = new Date(e.expense_date);
+      return d.getFullYear() === currentYear && d.getMonth() === currentMonthIdx;
+    });
+    const totalSpent = currentMonthExpenses.reduce((sum: number, e: any) => sum + Number(e.amount), 0);
+    const activeOverride = budgets.find((b: any) => Number(b.year) === currentYear && Number(b.month) === currentMonthIdx + 1);
+    const activeBudget = activeOverride ? Number(activeOverride.budget) : budgetLimit;
+    const remaining = activeBudget - totalSpent;
+
+    const byCat: Record<string, number> = {};
+    currentMonthExpenses.forEach((e: any) => {
+      byCat[e.category] = (byCat[e.category] ?? 0) + Number(e.amount);
+    });
+    const sortedCats = Object.entries(byCat).sort((a: any, b: any) => b[1] - a[1]);
+    const topCategoryName = sortedCats[0]?.[0] || "None";
+    const topCategorySpent = sortedCats[0]?.[1] || 0;
 
     const contextData = {
       user: {
@@ -88,6 +106,14 @@ serve(async (req) => {
       },
       system_date: currentDate,
       current_month: currentMonthStr,
+      computed_stats: {
+        current_month_budget: activeBudget,
+        current_month_spent: totalSpent,
+        current_month_remaining: remaining,
+        top_spending_category: topCategoryName,
+        top_spending_category_amount: topCategorySpent,
+        category_spending_breakdown: byCat
+      },
       monthly_budget_overrides: budgets.map((b: any) => ({
         year: b.year,
         month: b.month,
