@@ -94,17 +94,6 @@ frontend/
 └── vite.config.ts
 ```
 
----
-
-## Available Scripts
-
-* `npm run dev` – Starts the development server.
-* `npm run build` – Creates a production build.
-* `npm run lint` – Checks the code using ESLint.
-* `npm run format` – Formats the code using Prettier.
-
----
-
 ## Notes
 
 * Authentication is handled using Supabase Auth.
@@ -116,6 +105,7 @@ frontend/
 ## Future Improvements
 
 * Income tracking
+* AI financial chatbot
 * Recurring transactions
 * Receipt uploads
 * Better expense insights
