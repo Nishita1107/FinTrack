@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
-import { AIChatBot } from "@/components/AIChatBot";
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -114,7 +113,6 @@ export function AppShell() {
       <footer className="border-t border-border py-5 text-center text-xs text-muted-foreground">
         FinTrack © 2026 · Student Expense Management System
       </footer>
-      <AIChatBot />
       <Toaster richColors position="top-right" />
     </div>
   );

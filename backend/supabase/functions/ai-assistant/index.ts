@@ -41,7 +41,7 @@ serve(async (req) => {
     }
 
     // Read payload
-    const { action, message, month, year, chatHistory = [] } = await req.json();
+    const { action, month, year } = await req.json();
 
     if (!action) {
       return new Response(JSON.stringify({ error: "Missing action parameter" }), {
@@ -131,29 +131,7 @@ serve(async (req) => {
     let systemPrompt = "";
     let userPrompt = "";
 
-    if (action === "chat") {
-      systemPrompt = `You are FinTrack AI, a personal finance assistant.
-Answer using the user's financial data whenever possible.
-If the answer requires calculations, compute them from the provided data.
-If there is insufficient information, say so instead of guessing.
-Keep answers concise, practical, and action-oriented.
-Never output database technical details like table schemas, keys, or IDs.
-Refer to values in Indian Rupees (₹).
-Format your output using Markdown (bold, lists, headings).
-Be encouraging but realistic about budgets and savings.`;
-
-      // Build recent chat history block
-      let historyText = "";
-      if (chatHistory && chatHistory.length > 0) {
-        historyText = "Recent conversation history:\n" + chatHistory.map((m: any) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`).join("\n") + "\n\n";
-      }
-
-      userPrompt = `${historyText}Current User Question: "${message}"
-
-Here is the user's financial context for reference:
-${JSON.stringify(contextData, null, 2)}`;
-
-    } else if (action === "insights") {
+    if (action === "insights") {
       systemPrompt = `You are FinTrack AI.
 Analyze the user's transaction and budget history to generate 4-5 bulleted, dynamic, highly personalized financial insights.
 Each observation should be short, concise (1 sentence), and action-oriented.

@@ -2,17 +2,10 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Expense } from "@/lib/expense-constants";
 import type { MonthlyBudget } from "@/lib/use-expenses";
 
-export interface ChatMessage {
-  role: "user" | "assistant";
-  content: string;
-}
-
 export interface AIServicePayload {
-  action: "chat" | "insights" | "report";
-  message?: string;
+  action: "insights" | "report";
   month?: number;
   year?: number;
-  chatHistory?: ChatMessage[];
 }
 
 export interface AIExpenseContext {
@@ -120,32 +113,7 @@ async function executeClientSideAI(payload: AIServicePayload): Promise<string> {
       let systemPrompt = "";
       let userPrompt = "";
 
-      if (payload.action === "chat") {
-        systemPrompt = `You are FinTrack AI, a personal finance assistant.
-Answer using the user's financial data whenever possible.
-If the answer requires calculations, compute them from the provided data.
-If there is insufficient information, say so instead of guessing.
-Keep answers concise, practical, and action-oriented.
-Never output database technical details like table schemas, keys, or IDs.
-Refer to values in Indian Rupees (₹).
-Format your output using Markdown (bold, lists, headings).
-Be encouraging but realistic about budgets and savings.`;
-
-        let historyText = "";
-        if (payload.chatHistory && payload.chatHistory.length > 0) {
-          historyText =
-            "Recent conversation history:\n" +
-            payload.chatHistory
-              .map((m) => `${m.role === "user" ? "User" : "Assistant"}: ${m.content}`)
-              .join("\n") +
-            "\n\n";
-        }
-
-        userPrompt = `${historyText}Current User Question: "${payload.message}"
-
-Here is the user's financial context for reference:
-${JSON.stringify(contextData, null, 2)}`;
-      } else if (payload.action === "insights") {
+      if (payload.action === "insights") {
         systemPrompt = `You are FinTrack AI.
 Analyze the user's transaction and budget history to generate 4-5 bulleted, dynamic, highly personalized financial insights.
 Each observation should be short, concise (1 sentence), and action-oriented.
@@ -346,7 +314,7 @@ function runLocalFinancialAnalyzer(payload: AIServicePayload, context: AIContext
     const repOverride = context.monthly_budget_overrides.find(
       (b) => b.year === repYear && b.month === repMonth,
     );
-    const repBudget = repOverride ? repOverride.budget : defaultBudget;
+    const repBudget = repOverride ? repOverride.budget : context.user.default_monthly_budget;
     const repSavings = repBudget - repTotalSpent;
     const repPercent = repBudget > 0 ? Math.round((repTotalSpent / repBudget) * 100) : 0;
 
@@ -397,94 +365,5 @@ ${
 `;
   }
 
-  // chat fallback responses
-  const query = (payload.message || "").toLowerCase();
-
-  // food spending query
-  if (query.includes("food") || query.includes("eat") || query.includes("restaurant")) {
-    const foodSpent = categoryTotals["Food"] || 0;
-    return `You have spent **₹${foodSpent}** on **Food** this month. 
-${
-  foodSpent > 0
-    ? `This represents ${Math.round((foodSpent / totalSpentThisMonth) * 100)}% of your total spending (₹${totalSpentThisMonth}) so far. If you're ordering online frequently, cooking one more meal at home can save you roughly ₹800 a week!`
-    : "You haven't logged any food expenses this month yet."
-}`;
-  }
-
-  // afford query
-  if (query.includes("afford") || query.includes("laptop") || query.includes("buy")) {
-    const match = query.match(/\d+[\d,.]*/);
-    let amount = 40000; // default to laptop request if no amount matched
-    if (match) {
-      amount = Number(match[0].replace(/,/g, ""));
-    }
-
-    if (savings > amount) {
-      return `Yes, based on your current month's remaining balance of **₹${savings}**, you can afford this purchase of **₹${amount}** right now. However, doing so will use up ${Math.round((amount / savings) * 100)}% of your current buffer. It might be wise to wait until next month if it's not urgent.`;
-    } else {
-      const monthsNeeded = Math.ceil(amount / (savings > 0 ? savings : activeBudget * 0.2 || 2000));
-      return `Looking at your budget, a purchase of **₹${amount}** is higher than your current remaining savings of **₹${savings}**.
-To afford this responsibly without accumulating debt, you would need to save your average monthly surplus for about **${monthsNeeded} month(s)**. I suggest setting up a dedicated savings bucket in your profile.`;
-    }
-  }
-
-  // largest transaction query
-  if (query.includes("biggest") || query.includes("largest") || query.includes("expensive")) {
-    if (largestTransaction) {
-      return `Your biggest expense this month was **₹${largestTransaction.amount}** for **"${largestTransaction.description || largestTransaction.category}"** on **${largestTransaction.date}** in the **${largestTransaction.category}** category.`;
-    }
-    return "You have not recorded any transactions this month yet.";
-  }
-
-  // subscription query
-  if (query.includes("subscription") || query.includes("recurring") || query.includes("paying")) {
-    if (subscriptions.length > 0) {
-      const list = subscriptions
-        .map((s) => `- **${s.description || s.category}**: ₹${s.amount} on ${s.date}`)
-        .join("\n");
-      const totalSub = subscriptions.reduce((s, e) => s + e.amount, 0);
-      return `Here are the recurring charges or subscriptions detected in your history:
-${list}
-
-Total subscriptions: **₹${totalSub}** per month. Tips: Review these to see if there are services you no longer use!`;
-    }
-    return "I couldn't detect any explicit subscriptions in your transaction history. (I look for descriptions containing names like Netflix, Spotify, Prime, Youtube, or 'sub').";
-  }
-
-  // save money/tips query
-  if (query.includes("save") || query.includes("tip") || query.includes("advice")) {
-    return `Here are some personalized money-saving tips based on your spending:
-1. **Watch the UPI leak:** You use digital payments frequently. Try keeping a small cash balance for small items; it naturally limits impulse buys.
-2. **Category Cap:** Your heaviest spending is on **${topCategory?.[0] || "Other"}** (₹${topCategory?.[1] || 0}). Try capping this to 30% of your budget.
-3. **Chai & snacks:** Small daily expenses of ₹40-50 on chai/snacks add up to nearly ₹1,500/month. Log them to build awareness.
-
-*Note: For fully customized generative advice, enter your Gemini API Key in the Profile tab!*`;
-  }
-
-  // compare query
-  if (query.includes("compare") || query.includes("last month") || query.includes("increase")) {
-    return `Comparing your current month spending (₹${totalSpentThisMonth}) with your budget (₹${activeBudget}):
-- You have used **${percentSpent}%** of your budget.
-- Your net savings capacity is **₹${savings}**.
-- Your top spending category is **${topCategory?.[0] || "None"}** at **₹${topCategory?.[1] || 0}**.
-
-*Note: For a detailed comparison chart and multi-month trends, go to the **AI Report** or **Analytics** tab!*`;
-  }
-
-  // default chat answer
-  return `Hi ${context.user.name || "User"}! I am **FinTrack AI**. I can analyze your financial data and give you personalized answers.
-
-Here is a summary of your profile:
-- **This Month's Budget:** ₹${activeBudget}
-- **Spent so far:** ₹${totalSpentThisMonth}
-- **Remaining balance:** ₹${savings}
-- **Top Expense Category:** ${topCategory ? `${topCategory[0]} (₹${topCategory[1]})` : "None yet"}
-
-Try asking me specific questions like:
-- *How much did I spend on food this month?*
-- *Can I afford a ₹40,000 laptop?*
-- *What subscriptions am I paying for?*
-- *Give me tips to save more money.*
-
-*(Connect your backend Supabase Edge Function to enable live generative AI responses!)*`;
+  return "";
 }
