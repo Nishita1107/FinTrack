@@ -94,14 +94,6 @@ frontend/
 └── vite.config.ts
 ```
 
-## Notes
-
-* Authentication is handled using Supabase Auth.
-* PostgreSQL Row-Level Security (RLS) ensures users can only access their own data.
-* Demo Mode stores data in the browser using LocalStorage, making it easy to test the application without setting up Supabase.
-
----
-
 ## Future Improvements
 
 * Income tracking
