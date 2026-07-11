@@ -131,23 +131,7 @@ serve(async (req) => {
     let systemPrompt = "";
     let userPrompt = "";
 
-    if (action === "insights") {
-      systemPrompt = `You are FinTrack AI.
-Analyze the user's transaction and budget history to generate 4-5 bulleted, dynamic, highly personalized financial insights.
-Each observation should be short, concise (1 sentence), and action-oriented.
-Examples:
-- "Food spending increased by 18% this month compared to last month."
-- "You've spent ₹8,200 on Shopping, close to exceeding your ₹10,000 budget."
-- "Great job! Your Entertainment spending has decreased by 40%."
-- "You have ₹4,200 remaining in your budget for the month; save it to meet your goals."
-- "Your largest transaction this month was ₹12,000 for Bills on June 14."
-
-Generate EXACTLY 4 to 5 bullet points. Do not include introductory or concluding text. Do not number the bullets. Start each line with a dash '-'. Use ₹ symbol for currencies.`;
-
-      userPrompt = `Please generate the insights card bullet points based on this data:
-${JSON.stringify(contextData, null, 2)}`;
-
-    } else if (action === "report") {
+    if (action === "report") {
       const selectedYear = Number(year || new Date().getFullYear());
       const selectedMonth = Number(month || (new Date().getMonth() + 1));
       const monthNames = [

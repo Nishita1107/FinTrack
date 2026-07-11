@@ -3,7 +3,7 @@ import type { Expense } from "@/lib/expense-constants";
 import type { MonthlyBudget } from "@/lib/use-expenses";
 
 export interface AIServicePayload {
-  action: "insights" | "report";
+  action: "report";
   month?: number;
   year?: number;
 }
@@ -113,15 +113,7 @@ async function executeClientSideAI(payload: AIServicePayload): Promise<string> {
       let systemPrompt = "";
       let userPrompt = "";
 
-      if (payload.action === "insights") {
-        systemPrompt = `You are FinTrack AI.
-Analyze the user's transaction and budget history to generate 4-5 bulleted, dynamic, highly personalized financial insights.
-Each observation should be short, concise (1 sentence), and action-oriented.
-Generate EXACTLY 4 to 5 bullet points starting with a dash '-'. Use ₹ symbol. Do not write introductory or concluding text.`;
-
-        userPrompt = `Generate the insights card bullet points based on this data:
-${JSON.stringify(contextData, null, 2)}`;
-      } else if (payload.action === "report") {
+      if (payload.action === "report") {
         const selectedYear = Number(payload.year || new Date().getFullYear());
         const selectedMonth = Number(payload.month || new Date().getMonth() + 1);
         const monthNames = [
@@ -230,61 +222,6 @@ function runLocalFinancialAnalyzer(payload: AIServicePayload, context: AIContext
       e.description.toLowerCase().includes("youtube") ||
       e.description.toLowerCase().includes("recharge"),
   );
-
-  if (payload.action === "insights") {
-    const list: string[] = [];
-
-    // Insight 1: Budget progress
-    if (percentSpent >= 100) {
-      list.push(
-        `- You have exceeded your monthly budget of ₹${activeBudget} by ₹${Math.abs(savings)}. Consider freezing non-essential spending.`,
-      );
-    } else if (percentSpent >= 80) {
-      list.push(
-        `- Budget warning: You've spent ₹${totalSpentThisMonth} (${percentSpent}% of your ₹${activeBudget} budget) with ${30 - now.getDate()} days left.`,
-      );
-    } else {
-      list.push(
-        `- Safe Zone: You've utilized ${percentSpent}% of your monthly budget. You have ₹${savings} left to save or spend.`,
-      );
-    }
-
-    // Insight 2: Top spending category
-    if (topCategory) {
-      list.push(
-        `- Food & dining is your highest expense area, accounting for ₹${topCategory[1]} this month.`,
-      );
-    } else {
-      list.push(
-        `- No transactions logged yet this month. Try adding your expenses to see detailed category analyses.`,
-      );
-    }
-
-    // Insight 3: Largest transaction
-    if (largestTransaction) {
-      list.push(
-        `- Your single largest expense this month was ₹${largestTransaction.amount} for "${largestTransaction.description || largestTransaction.category}" on ${largestTransaction.date}.`,
-      );
-    }
-
-    // Insight 4: Savings trend
-    if (savings > 0) {
-      list.push(
-        `- Great job! You are currently on track to save ₹${savings} this month, which is ${Math.round((savings / activeBudget) * 100)}% of your budget.`,
-      );
-    } else {
-      list.push(
-        `- Budget leak: Your expenses are outpacing your monthly allowance. Try setting sub-budgets for categories.`,
-      );
-    }
-
-    // Add API key instruction as helper tip
-    list.push(
-      `- [Tip] Configure VITE_GEMINI_API_KEY in your local .env to enable live AI responses.`,
-    );
-
-    return list.slice(0, 5).join("\n");
-  }
 
   if (payload.action === "report") {
     const repYear = payload.year || thisYear;
